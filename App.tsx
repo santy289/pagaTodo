@@ -1,8 +1,17 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
-import List from './app/screens/List';
-import Details from './app/screens/Details';
+import List from './src/app/screens/List';
+import Details from './src/app/screens/Details';
+import {
+  API_KEY,
+  AUTH_DOMAIN,
+  PROJECT_ID,
+  STORAGE_BUCKET,
+  MENSSAGIN_SENDER_ID,
+  APP_ID,
+  MEASUREMENT_ID,
+} from "./.env";
 
 const Stack = createNativeStackNavigator();
 
