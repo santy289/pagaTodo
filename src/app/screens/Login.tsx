@@ -154,12 +154,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     fontWeight: 'bold',
-    color: '#4287f5',
+    color: '#55e6c3',
     textAlign: 'center',
     marginBottom: 40,
   },
   link: {
-    color: "blue",
+    fontSize: 18,
+    color: "#55e6c3",
+    textDecorationLine: 'underline',
+    fontWeight: 'bold',
   },
   modalContainer: {
     flex: 1,
@@ -182,7 +185,7 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   button: {
-    backgroundColor: '#4287f5',
+    backgroundColor: '#55e6c3',
     marginBottom: 20,
     paddingHorizontal: 20,
     paddingVertical: 10,

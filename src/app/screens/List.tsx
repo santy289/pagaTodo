@@ -292,7 +292,7 @@ const List = ({ navigation, route }: any) => {
     title: {
         fontSize: 30,
         fontWeight: 'bold',
-        color: '#4287f5',
+        color: '#55e6c3',
         textAlign: 'center',
         marginBottom: 40,
     },
@@ -312,7 +312,7 @@ const List = ({ navigation, route }: any) => {
     },
     bankUrl: {
         fontSize: 20,
-        color: 'blue',
+        color: '#55e6c3',
         marginBottom: 8,
     },
     bankAge: {
@@ -375,7 +375,7 @@ const List = ({ navigation, route }: any) => {
         alignItems: 'center',
     },
     button: {
-        backgroundColor: '#4287f5',
+        backgroundColor: '#55e6c3',
         marginBottom: 20,
         paddingHorizontal: 20,
         paddingVertical: 10,
