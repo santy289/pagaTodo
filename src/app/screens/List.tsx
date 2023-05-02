@@ -1,8 +1,8 @@
 import { addDoc, collection, deleteDoc, doc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
-import { useState } from "react";
-import { useEffect } from "react";
-import { View, Text, Button, ScrollView, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput } from "react-native";
+import { useEffect, useState } from "react";
+import { View, Text, Alert, Button, ScrollView, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Linking } from "react-native";
 import { AntDesign } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons'; 
 import { FIREBASE_DB } from "../../../firebaseConfig.ts";
 
 type bank = {
@@ -17,17 +17,17 @@ type bankList = [
   bank?: bank
 ]
 
-const List = ({ navigation }: any) => {
-
+const List = ({ navigation, route }: any) => {
+    const idUser = route.params.id;
     const [banks, setBanks] = useState<bankList>([]);
     const [newId, serNewId] = useState('');
     const [isModalVisible, setModalVisible] = useState(false);
     const [isCreateModalVisible, setCreateModalVisible] = useState(false);
     const [document, setDocument] = useState<bank>({
-    bankName: 'x',
-    url: 'x',
+    bankName: '',
+    url: '',
     age: 0,
-    description: 'x'
+    description: ''
     });
 
     const openCreateModal = () => {
@@ -44,8 +44,8 @@ const List = ({ navigation }: any) => {
         setCreateModalVisible(false);
     };
 
-    const hanlderAdd = () => {
-        addDoc(collection(FIREBASE_DB, 'Banks'), {  
+    const hanlderAdd = async () => {
+        addDoc(collection(FIREBASE_DB, idUser), {  
             bankName: document.bankName,
             url: document.url,
             age: document.age,
@@ -55,7 +55,36 @@ const List = ({ navigation }: any) => {
 
     const renderBank = ({ item }: any) => {
 
-    serNewId(item.id)
+    const showAlert = () => {
+        console.log(item.id)
+        serNewId(item.id);
+        Alert.alert(
+            'Delete Bank',
+            '¿Are You Sure?',
+            [
+            {
+                text: 'Acept',
+                onPress: () => {
+                handlerDelete(item.id);
+                },
+            },
+            {
+                text: 'Cancel',
+                onPress: () => {
+                closeModal();
+                },
+                style: 'cancel',
+            },
+            ],
+            { cancelable: false }
+        );
+    };
+
+    const handleURLPress = () => {
+        if (item?.url) {
+          Linking.openURL(item.url);
+        }
+      };
 
     const openModal = () => {
         setDocument({
@@ -72,8 +101,8 @@ const List = ({ navigation }: any) => {
         setModalVisible(false);
     };
 
-    const handlerSave = () => {
-        const docRef = doc(FIREBASE_DB, `Banks/${newId}`)
+    const handlerSave = async () => {
+        const docRef = doc(FIREBASE_DB, `${idUser}/${newId}`)
         updateDoc(docRef,{  
         bankName: document.bankName,
         url: document.url,
@@ -82,9 +111,10 @@ const List = ({ navigation }: any) => {
         closeModal();
         }
 
-    const handlerDelete = () => {
-        const docRef = doc(FIREBASE_DB, `Banks/${newId}`)
+    const handlerDelete = async (id) => {
+        const docRef = doc(FIREBASE_DB, `${idUser}/${id}`)
         deleteDoc(docRef);
+
     }
     return (
         <View style={styles.bankContainer}>
@@ -131,21 +161,27 @@ const List = ({ navigation }: any) => {
                 />
             </View>
             <View style={styles.buttonContainer}>
-                <Button title="Save" onPress={handlerSave} />
-                <Button title="Cancel" onPress={closeModal} />
+                <TouchableOpacity style={styles.button} onPress={handlerSave}>
+                    <Text style={styles.buttonText}>Save</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.button} onPress={closeModal} >
+                    <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
             </View>
             </View>
         </View>
         </Modal>
         <Text style={styles.bankName}>{item?.bankName}</Text>
-        <Text style={styles.bankUrl}>{item?.url}</Text>
+        <TouchableOpacity onPress={handleURLPress}>
+            <Text style={styles.bankUrl}>Link</Text>
+        </TouchableOpacity>
         <Text style={styles.bankAge}>{item?.age}</Text>
         <Text style={styles.bankDescription}>{item?.description}</Text>
         <View style={styles.iconContainer}>
             <TouchableOpacity onPress={openModal} >
             {item && <AntDesign name="edit" size={24} color="black" />}
             </TouchableOpacity>
-            <TouchableOpacity onPress={handlerDelete} >
+            <TouchableOpacity onPress={showAlert} >
             {item && <AntDesign name="delete" size={24} color="red" />}
             </TouchableOpacity> 
         </View>
@@ -154,7 +190,8 @@ const List = ({ navigation }: any) => {
     }
 
     useEffect(() => {
-    const bdRef = collection(FIREBASE_DB, 'Banks');
+        
+    const bdRef = collection(FIREBASE_DB, idUser);
 
     const suscriber = onSnapshot(bdRef, {
         next: (snapshot) => {
@@ -172,7 +209,7 @@ const List = ({ navigation }: any) => {
     }, [])
 
     return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
         <Modal visible={isCreateModalVisible}>
         <View style={styles.modalContainer}>
             <View style={styles.contentContainer}>
@@ -216,24 +253,31 @@ const List = ({ navigation }: any) => {
                 />
             </View>
             <View style={styles.buttonContainer}>
-                <Button title="Save" onPress={hanlderAdd} />
-                <Button title="Cancel" onPress={closeCreateModal} />
+                <TouchableOpacity style={styles.button} onPress={hanlderAdd}>
+                    <Text style={styles.buttonText}>Save</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.button} onPress={closeCreateModal} >
+                    <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
             </View>
             </View>
         </View>
         </Modal>
-        <Text style={styles.title}>List</Text>
-        <Button onPress={openCreateModal} title="Create Document" />
+        <Text style={styles.title}>List of Banks</Text>
+        <TouchableOpacity style={styles.button} onPress={openCreateModal} >
+            <Text style={styles.buttonText}>Add New bank</Text>
+            <Ionicons name="add" size={30} color="white" />
+        </TouchableOpacity>
         {banks.length > 0 && (
-        <View style={styles.bankListContainer}>
+        <ScrollView style={styles.bankListContainer}>
             <FlatList
             data={banks}
             renderItem={renderBank}
             keyExtractor={(bank: any) => bank?.id}
             />
-        </View>
+        </ScrollView >
         )}
-    </ScrollView>
+    </View>
     )
     }
 
@@ -246,9 +290,11 @@ const List = ({ navigation }: any) => {
         backgroundColor: '#F7F9FC',
     },
     title: {
-        fontSize: 24,
+        fontSize: 30,
         fontWeight: 'bold',
-        marginBottom: 16,
+        color: '#4287f5',
+        textAlign: 'center',
+        marginBottom: 40,
     },
     bankListContainer: {
         marginTop: 16,
@@ -256,8 +302,8 @@ const List = ({ navigation }: any) => {
     bankContainer: {
         alignItems: 'center',
         backgroundColor: 'white',
-        padding: 16,
-        marginBottom: 16,
+        padding: 20,
+        marginBottom: 20,
         borderRadius: 8,
     },
     bankName: {
@@ -265,8 +311,8 @@ const List = ({ navigation }: any) => {
         fontWeight: 'bold',
     },
     bankUrl: {
-        fontSize: 16,
-        color: 'gray',
+        fontSize: 20,
+        color: 'blue',
         marginBottom: 8,
     },
     bankAge: {
@@ -276,7 +322,7 @@ const List = ({ navigation }: any) => {
     },
     bankDescription: {
         fontSize: 16,
-        marginBottom: 16,
+        marginBottom: 8,
         fontWeight: '300'
     },
     iconContainer: {
@@ -327,5 +373,20 @@ const List = ({ navigation }: any) => {
         width: '80%',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    button: {
+        backgroundColor: '#4287f5',
+        marginBottom: 20,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    buttonText: {
+        minWidth: 40,
+        fontSize: 16,
+        color: 'white',
+        fontWeight: 'bold',
     },
     });
